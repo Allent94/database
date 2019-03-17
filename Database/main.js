@@ -1,6 +1,9 @@
 var globalSeed = [];
+var seedPatch = [];
 
 var seedGrow = 0;
+
+var gameEngine;
 
 
 function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, frameDuration, frames, loop, reverse) {
@@ -117,9 +120,6 @@ Background.prototype.draw = function (ctx) {
     
     }
 
-
-
-    //console.log("HERE")
 };
 
 Background.prototype.update = function () {
@@ -128,11 +128,11 @@ Background.prototype.update = function () {
 
 
 
-function Seed(game, x, y, r) {
+function Seed(game, x, y) {
     this.x = x;
     this.y = y;
     this.game = game;
-    this.gotRain = r;
+    this.gotRain = false;
     this.grow = 0;
     this.boundingbox = new BoundingBox(this.x + 15, this.y + 15, -30, -30);
     this.ctx = game.ctx;
@@ -144,43 +144,21 @@ Seed.prototype.constructor = Seed;
 
 Seed.prototype.update = function () {
 
-   // this.game.gameSave = this.game.seedPatch;
+    globalSeed.push(this.grow);
 
- //  globalSeed = this.game.seedPatch;
-
-   //console.log(globalSeed);
-
-    // console.log("seed amesave: " + this.game.seedPatch);
-    // console.log("game gamesave: " + this.game.gameSave);
-
-    if(this.gotRain){
+ //   console.log(globalSeed);
 
 
-
-        this.grow += 1;
-
+    for(let i = 0; i < seedPatch.length; i++){
+        let CurrentSeed = seedPatch[i];
 
     }
 
-
-    for(let i = 0; i < this.game.seedPatch.length; i++){
-        let CurrentSeed = this.game.seedPatch[i];
-
-
-        
-
-
-    }
-
-
-   // globalSeed = this.seedPatch;
-
-    //console.log(globalSeed);
- 
 
 };
 
 Seed.prototype.draw = function (ctx) {
+    
     // this.ctx.drawImage(this.spritesheet,
     //                this.x, this.y);
 
@@ -190,11 +168,28 @@ Seed.prototype.draw = function (ctx) {
             // ctx.strokeStyle = "blue";
             // ctx.strokeRect(this.x + 15, this.y + 15, -30, -30);
 
+
+
            // console.log(this.gotRain);
 
+
+           ctx.beginPath();
+           ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);
+         //  ctx.strokeStyle ="black";
+           ctx.fillStyle = "rgb(255,255,255)";
+           ctx.fill();
+           ctx.stroke();
         
 
             if(this.gotRain){
+
+
+                this.grow += 1;
+
+            }
+
+
+            if(this.grow > 1){
 
                // console.log("Black");
                ctx.beginPath();
@@ -206,12 +201,9 @@ Seed.prototype.draw = function (ctx) {
 
                //console.log(ctx.fillStyle);
 
-               if(ctx.fillStyle ==  "#ffff00"){
-    
-                seedGrow += 1;
 
-               }
-            
+            }
+      
 
 
                 if(this.grow > 500){
@@ -290,28 +282,17 @@ Seed.prototype.draw = function (ctx) {
                 }
 
 
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);
-                //ctx.strokeStyle ="black";
-                ctx.fillStyle= "rgb(255, 255,0)";
-                ctx.fill();
-                ctx.stroke();
-
        
-                }else{
+                
+
+            
 
 
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);
-              //  ctx.strokeStyle ="black";
-                ctx.fillStyle = "rgb(255,255,255)";
-                ctx.fill();
-                ctx.stroke();
+
                 
 
     
-                }
+                
             
 
     //console.log("HERE")
@@ -321,7 +302,7 @@ Seed.prototype.draw = function (ctx) {
 function Cloud(game) {
 
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/cloud.png"), 0, 0, 100, 75, 0.5, 1, true, false);
-    this.seedpatch = game.seedPatch[0];
+   // this.seedpatch = game.seedPatch[0];
     this.nX = Math.round(Math.random()) * 2 - 1;
     this.nY = Math.round(Math.random()) * 2 - 1;
     this.boundingbox = new BoundingBox(this.x, this.y, 100/2, 75/2);
@@ -341,7 +322,7 @@ Cloud.prototype.reset = function() {
 Cloud.prototype.update = function () {
 
 
-    console.log(this.game.totalHitSeeds);
+    //console.log(this.game.totalHitSeeds);
     
     this.x -= this.nX;
     this.y -= this.nY
@@ -372,8 +353,8 @@ Cloud.prototype.update = function () {
 
 
 
-    for(let i = 0; i < this.game.seedPatch.length; i++){
-        let CurrentSeed = this.game.seedPatch[i];
+    for(let i = 0; i < seedPatch.length; i++){
+        let CurrentSeed = seedPatch[i];
 
         if(this.boundingbox.collide(CurrentSeed.boundingbox)){
 
@@ -423,13 +404,13 @@ ASSET_MANAGER.downloadAll(function () {
     var ctx = canvas.getContext("2d");  
 
 
-    var gameEngine = new GameEngine();
+    gameEngine = new GameEngine();
     gameEngine.init(ctx);
     gameEngine.start();
     
     gameEngine.addEntity(new Background(gameEngine));   
     
-    var seedPatch = [];
+  //  var seedPatch = [];
     let seeds;
     
     gameEngine.seedPatch = seedPatch;
@@ -438,12 +419,12 @@ ASSET_MANAGER.downloadAll(function () {
         for(let col = 0; col < 7; col++){
             
 
-            seeds = new Seed(gameEngine, 50 + 100 * row, 50 + 100 * col, false);
+            seeds = new Seed(gameEngine, 50 + 100 * row, 50 + 100 * col);
             
             gameEngine.addEntity(seeds);
             seedPatch.push(seeds);
 
-            console.log("seed: " + seedPatch.data);
+          //  console.log("seed: " + seedPatch.data);
             
            
 
@@ -477,7 +458,20 @@ ASSET_MANAGER.downloadAll(function () {
     saveButton.onclick = function () {
       console.log("save");
       text.innerHTML = "Saved."
-      socket.emit("save", { studentname: "Allen Tran", statename: "growSave", data: seedGrow});
+
+
+
+      let saveSeed = [];
+      for(let i = 0; i < seedPatch.length; i++){
+
+        saveSeed[i] = seedPatch[i].grow;
+
+
+      }
+
+      //console.log("Seed at: " + saveSeed[2]);
+
+      socket.emit("save", { studentname: "Allen Tran", statename: "growSave", data: saveSeed});
     };
   
     loadButton.onclick = function () {
@@ -487,6 +481,21 @@ ASSET_MANAGER.downloadAll(function () {
     };
 
     socket.on("load", function (data) {
+
+        let loadSaveSeed = data.data;
+
+
+        for(let i = 0; i < seedPatch.length; i++){
+
+
+            seedPatch[i].grow = loadSaveSeed[i];
+
+
+        }
+
+       // console.log("Seed at: " + loadSaveSeed[2]);
+
+
         console.log("last time I grew:  " + data.data);
        // seedPatch = data;
 
